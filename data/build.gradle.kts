@@ -37,6 +37,7 @@ dependencies {
     implementation(project(":domain"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.security.crypto.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
 }
