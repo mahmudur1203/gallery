@@ -8,10 +8,8 @@ import com.myapp.gallery.domain.usecase.GetAlbumsUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
-import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -22,14 +20,15 @@ class AlbumsViewModelTest : BaseUnitTest() {
 
     private val successResult = Resource.Success<List<Album>>(listOf(mock()))
     private val errorResult = Resource.Error("Error")
-    private val loadingResult = Resource.Loading
+
 
     @Test
     fun `getAlbumsUseCase should be called single time when fetchAlbums is called`(): Unit = runBlocking {
 
         viewModel = AlbumsViewModel(getAlbumsUseCase)
 
-        viewModel.fetchAlbums()
+        // fetchAlbums is called when the viewModel is created
+        //viewModel.fetchAlbums()
 
         verify(getAlbumsUseCase,times(1)).invoke()
 

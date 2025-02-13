@@ -16,14 +16,18 @@ class AlbumsViewModel @Inject constructor(
     private val getAlbumsUseCase: GetAlbumsUseCase
 ) : ViewModel() {
 
-    private val _albums = MutableStateFlow<Resource<List<Album>>?>(null)
-    val albums: StateFlow<Resource<List<Album>>?> = _albums
+    private val _albums = MutableStateFlow<Resource<List<Album>>>(Resource.Empty)
+    val albums: StateFlow<Resource<List<Album>>> = _albums
 
-
+    init {
+        fetchAlbums()
+    }
 
     fun fetchAlbums() {
 
-        _albums.value = Resource.Loading
+        if(_albums.value == Resource.Empty){
+            _albums.value = Resource.Loading
+        }
 
         viewModelScope.launch {
             _albums.value = getAlbumsUseCase()

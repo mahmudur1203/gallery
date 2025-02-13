@@ -7,8 +7,8 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.0"
-composeBom = "2025.01.01"
-composeNavigation = "2.8.6"
+composeBom = "2025.02.00"
+composeNavigation = "2.8.7"
 appcompat = "1.7.0"
 material = "1.12.0"
 jetbrainsKotlinJvm = "2.1.0"
@@ -17,7 +17,7 @@ timber = "4.7.1"
 hilt = "2.55"
 hiltNavigation = "1.2.0"
 javaxInject = "1"
-mockito = "5.2.0"
+mockito = "5.5.0"
 mockito-kotlin = "4.1.0"
 mockito-inline = "5.2.0"
 truth = "1.4.4"
@@ -26,6 +26,11 @@ coroutines-test = "1.10.1"
 archCoreTesting = "2.2.0"
 turbine = "1.2.0"
 coil = "2.7.0"
+robolectric = "4.14.1"
+mockito-android = "5.5.0"
+kover = "0.9.1"
+runner = "1.6.2"
+orchestrator = "1.5.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,14 +69,17 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+test-robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockito-inline" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines-test" }
 androidx-arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "archCoreTesting" }
-
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockito-android" }
+runner = { module = "androidx.test:runner", version.ref = "runner" }
+orchestrator = { module = "androidx.test:orchestrator", version.ref = "orchestrator" }
 
 
 [plugins]
@@ -83,3 +91,4 @@ jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrai
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin"  }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
