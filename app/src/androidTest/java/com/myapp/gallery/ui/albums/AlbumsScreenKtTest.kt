@@ -6,8 +6,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.state.Resource
+import com.myapp.gallery.testing.data.albumsTestData
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -65,27 +67,15 @@ class AlbumsScreenKtTest{
     @Test
     fun albumsScreen_displayAlbums_whenSuccess() {
 
-        val albumsTestData =
-            listOf(
-                Album("Album 1", 100, "https://picsum.photos/id/100/200/300"),
-                Album("Album 2", 200, "https://picsum.photos/id/200/200/300"),
-                Album("Album 3", 300, "https://picsum.photos/id/300/200/300"),
-                Album("Album 4", 400, "https://picsum.photos/id/400/200/300"),
-                Album("Album 5", 500, "https://picsum.photos/id/500/200/300"),
-                Album("Album 6", 600, "https://picsum.photos/id/600/200/300"),
-                Album("Album 7", 700, "https://picsum.photos/id/700/200/300"),
-                Album("Album 8", 800, "https://picsum.photos/id/800/200/300"),
-                Album("Album 9", 900, "https://picsum.photos/id/900/200/300"),
-                Album("Album 10", 1000, "https://picsum.photos/id/1000/200/300"))
-
+        val albumsTestData = (albumsTestData)
         composeTestRule.setContent {
             AlbumsScreenContent(Resource.Success(albumsTestData), {} , {})
         }
 
         composeTestRule.onNodeWithTag("AlbumItem_Album 1").isDisplayed()
 
-        composeTestRule.onNodeWithTag("AlbumItem_Album 10").performScrollTo()
-        composeTestRule.onNodeWithTag("AlbumItem_Album 10").isDisplayed()
+        composeTestRule.onNodeWithTag("AlbumList").performScrollToIndex(20)
+        composeTestRule.onNodeWithTag("AlbumItem_Album 19").isDisplayed()
 
     }
 

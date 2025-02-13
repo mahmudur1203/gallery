@@ -45,8 +45,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
 
-
     androidTestImplementation(libs.runner)
     androidTestUtil(libs.orchestrator)
+
+    testImplementation(project(":testing"))
+    androidTestImplementation(project(":testing"))
 
 }

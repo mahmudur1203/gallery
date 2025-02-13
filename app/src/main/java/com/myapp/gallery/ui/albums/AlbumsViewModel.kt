@@ -30,7 +30,12 @@ class AlbumsViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _albums.value = getAlbumsUseCase()
+
+            getAlbumsUseCase().collect { it ->
+                _albums.value = it
+            }
+
+
         }
 
     }

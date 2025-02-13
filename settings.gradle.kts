@@ -25,3 +25,4 @@ rootProject.name = "Gallery"
 include(":app")
 include(":data")
 include(":domain")
+include(":testing")

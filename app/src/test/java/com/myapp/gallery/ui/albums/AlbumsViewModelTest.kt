@@ -6,6 +6,7 @@ import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.state.Resource
 import com.myapp.gallery.domain.usecase.GetAlbumsUseCase
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -23,7 +24,7 @@ class AlbumsViewModelTest : BaseUnitTest() {
 
 
     @Test
-    fun `getAlbumsUseCase should be called single time when fetchAlbums is called`(): Unit = runBlocking {
+    fun `albums data should be fetched from getAlbumsUseCase`(): Unit = runBlocking {
 
         viewModel = AlbumsViewModel(getAlbumsUseCase)
 
@@ -37,10 +38,7 @@ class AlbumsViewModelTest : BaseUnitTest() {
     @Test
     fun `fetchAlbums should update state with success when albums are available`(): Unit = runBlocking {
 
-        whenever(getAlbumsUseCase.invoke()).thenReturn(
-            successResult)
-
-        viewModel = AlbumsViewModel(getAlbumsUseCase)
+        viewModel=mockSuccessfulCase()
 
         viewModel.fetchAlbums()
 
@@ -49,13 +47,11 @@ class AlbumsViewModelTest : BaseUnitTest() {
 
     }
 
+
     @Test
     fun `fetchAlbums should update state with error when albums are not available`(): Unit = runBlocking {
 
-        whenever(getAlbumsUseCase.invoke()).thenReturn(
-            errorResult)
-
-        viewModel = AlbumsViewModel(getAlbumsUseCase)
+        viewModel = mockErrorCase()
 
         viewModel.fetchAlbums()
 
@@ -64,6 +60,19 @@ class AlbumsViewModelTest : BaseUnitTest() {
 
     }
 
+    private suspend fun mockSuccessfulCase() : AlbumsViewModel {
+        whenever(getAlbumsUseCase.invoke()).thenReturn(
+            flow { emit(successResult) })
+
+        return AlbumsViewModel(getAlbumsUseCase)
+    }
+
+    private suspend fun mockErrorCase() : AlbumsViewModel {
+        whenever(getAlbumsUseCase.invoke()).thenReturn(
+            flow { emit(errorResult) })
+
+        return AlbumsViewModel(getAlbumsUseCase)
+    }
 
 
 }

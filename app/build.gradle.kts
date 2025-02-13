@@ -54,8 +54,6 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data"))
 
-    kover(project(":domain"))
-    kover(project(":data"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -98,6 +96,14 @@ dependencies {
     androidTestImplementation(libs.runner)
     androidTestUtil(libs.orchestrator)
 
+    kover(project(":domain"))
+    kover(project(":data"))
+    //kover(project(":testing"))
+
+    testImplementation(project(":testing"))
+    androidTestImplementation(project(":testing"))
+
+
 }
 
 kover {
@@ -130,7 +136,8 @@ kover {
                     "*.navigation",
                     "*.extensions",
                     "*.state\$.*",
-                    "com.myapp.gallery.BuildConfig" // Exclude BuildConfig
+                    "com.myapp.gallery.BuildConfig",
+                    "com.myapp.gallery.testing"
                 )
             }
         }
