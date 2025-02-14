@@ -17,7 +17,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,20 +41,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.github.panpf.sketch.AsyncImage
 import com.github.panpf.sketch.LocalPlatformContext
 import com.github.panpf.sketch.SingletonSketch
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.state.Resource
+import com.myapp.gallery.ui.theme.GalleryTheme
 import java.text.NumberFormat
 import java.util.Locale
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun AlbumsScreen(viewModel: AlbumsViewModel = hiltViewModel()) {
+fun AlbumsScreen(viewModel: AlbumsViewModel = hiltViewModel(),
+                 navController: NavHostController
+) {
 
     LaunchedEffect(Unit) {
         if (viewModel.albums.value == Resource.Empty) {
@@ -59,11 +67,29 @@ fun AlbumsScreen(viewModel: AlbumsViewModel = hiltViewModel()) {
         }
     }
 
-    val albums by viewModel.albums.collectAsState()
+    val albumsResource by viewModel.albums.collectAsState()
 
-    AlbumsScreenContent(albums,
-        onAlbumClick = {},
-        onRetryClick = { viewModel.fetchAlbums() })
+    Scaffold(
+        topBar = {
+            TopBar(title = "Albums", onBackClick = { navController.popBackStack() })
+        },
+        content = { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+
+                AlbumsScreenContent(albumsResource,
+                    onAlbumClick = {
+                        navController.navigate("media_list/${it.id}/${it.name}")
+                    },
+                    onRetryClick = { viewModel.fetchAlbums() })
+
+            }
+        }
+    )
 
 }
 
@@ -74,42 +100,26 @@ fun AlbumsScreenContent(
     onRetryClick: () -> Unit
 ) {
 
-
-    Scaffold(
-        topBar = {
-            TopBar(title = "Albums")
-        },
-        content = { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-
-                when (albumsResource) {
-                    Resource.Loading -> {
-                        CircularProgressIndicator(modifier = Modifier.testTag("LoadingIndicator"))
-                    }
-
-                    is Resource.Error -> {
-                        ErrorMessage(albumsResource.message, onRetryClick)
-                    }
-
-                    is Resource.Success -> {
-                        AlbumList(albumsResource.data, onAlbumClick)
-                    }
-
-                    Resource.Empty -> {}
-                }
-
-            }
+    when (albumsResource) {
+        Resource.Loading -> {
+            CircularProgressIndicator(modifier = Modifier.testTag("LoadingIndicator"))
         }
-    )
+
+        is Resource.Error -> {
+            ErrorMessage(albumsResource.message, onRetryClick)
+        }
+
+        is Resource.Success -> {
+            AlbumList(albumsResource.data, onAlbumClick)
+        }
+
+        Resource.Empty -> {}
+    }
+
 }
 
 @Composable
-private fun ErrorMessage(
+fun ErrorMessage(
     message: String,
     onRetryClick: () -> Unit
 ) {
@@ -130,7 +140,6 @@ private fun ErrorMessage(
         Spacer(modifier = Modifier.height(8.dp))
 
 
-
         Button(
             modifier = Modifier.testTag("RetryButton"),
             onClick = { onRetryClick() }) {
@@ -144,7 +153,7 @@ private fun ErrorMessage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(title: String) {
+fun TopBar(title: String, onBackClick: () -> Unit) {
 
     TopAppBar(
         title = {
@@ -153,6 +162,7 @@ fun TopBar(title: String) {
                 text = title
             )
         },
+
 
         actions = {
             IconButton(onClick = { /*TODO*/ }) {
@@ -190,9 +200,7 @@ fun AlbumItem(album: Album, onAlbumClick: (Album) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable {
-                onAlbumClick(album)
-            }
+
             .testTag("AlbumItem_" + album.name)
     ) {
         Box(
@@ -208,7 +216,9 @@ fun AlbumItem(album: Album, onAlbumClick: (Album) -> Unit) {
                         width = 1.dp,
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
                         shape = RoundedCornerShape(12.dp)
-                    )
+                    ).clickable {
+                        onAlbumClick(album)
+                    }
                     .clip(RoundedCornerShape(12.dp)),
 
                 uri = album.thumbnailUri.toString(),
@@ -231,3 +241,15 @@ fun AlbumItem(album: Album, onAlbumClick: (Album) -> Unit) {
     }
 }
 
+@Preview
+@Composable
+fun AlbumsScreenPreview() {
+    GalleryTheme {
+        AlbumList(albums = listOf(
+            Album(id = 1, name = "Album 1", itemCount = 100, thumbnailUri = ""),
+            Album(id = 2, name = "Album 2", itemCount = 200, thumbnailUri = ""),
+            Album(id = 3, name = "Album 3", itemCount = 300, thumbnailUri = ""),
+        ), onAlbumClick = {})
+
+    }
+}

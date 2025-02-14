@@ -3,18 +3,16 @@ package com.myapp.gallery.data.repository
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
 import com.myapp.gallery.data.CoroutineTestRule
-import com.myapp.gallery.data.local.mediastore.MediaItem
 import com.myapp.gallery.data.local.mediastore.MediaStoreDataSource
 import com.myapp.gallery.domain.repository.AlbumRepository
 import com.myapp.gallery.domain.state.Resource
-import com.myapp.gallery.testing.data.mediaItemList
+import com.myapp.gallery.testing.data.mediaFolderListTestData
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
-import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -54,7 +52,7 @@ class AlbumRepositoryImplTest{
         assertThat(result.isSuccess).isTrue()
 
         if (result is Resource.Success) {
-            assertThat(result.data.size).isEqualTo(mediaItemList.size)
+            assertThat(result.data.size).isEqualTo(mediaFolderListTestData.size)
         }
 
     }
@@ -73,7 +71,7 @@ class AlbumRepositoryImplTest{
     private suspend fun mockSuccessfulCase() : AlbumRepository {
 
         whenever(mediaStoreDataSource.getAlbums()).thenReturn(
-            Result.success(mediaItemList)
+            Result.success(mediaFolderListTestData)
         )
 
         return  AlbumRepositoryImpl(

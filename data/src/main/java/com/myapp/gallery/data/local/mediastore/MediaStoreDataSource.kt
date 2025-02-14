@@ -7,10 +7,10 @@ import android.provider.MediaStore
 
 class MediaStoreDataSource(private val context:Context) {
 
-    suspend fun getAlbums() : Result<MutableList<MediaItem>> {
+    suspend fun getAlbums() : Result<MutableList<MediaFolder>> {
 
          return runCatching {
-            val albumMap = mutableMapOf<Long, MediaItem>()
+            val albumMap = mutableMapOf<Long, MediaFolder>()
             val allImages = mutableListOf<Uri>()
             val allVideos = mutableListOf<Uri>()
 
@@ -32,7 +32,8 @@ class MediaStoreDataSource(private val context:Context) {
 
             if (allImages.isNotEmpty()) {
                 finalAlbums.add(
-                    MediaItem(
+                    MediaFolder(
+                        id = -1,
                         name = "All Images",
                         itemCount = allImages.size,
                         thumbnailUri = allImages.first().toString(),
@@ -42,7 +43,8 @@ class MediaStoreDataSource(private val context:Context) {
 
             if (allVideos.isNotEmpty()) {
                 finalAlbums.add(
-                    MediaItem(
+                    MediaFolder(
+                        id = -2,
                         name = "All Videos",
                         itemCount = allVideos.size,
                         thumbnailUri = allVideos.first().toString(),
@@ -60,7 +62,7 @@ class MediaStoreDataSource(private val context:Context) {
     private fun fetchMediaFromStore(
         context: Context,
         uri: Uri,
-        albumMap: MutableMap<Long, MediaItem>,
+        albumMap: MutableMap<Long, MediaFolder>,
         allMedia: MutableList<Uri>
     ) {
         runCatching {
@@ -91,7 +93,8 @@ class MediaStoreDataSource(private val context:Context) {
                         val updatedAlbum = albumMap[bucketId]!!.copy(itemCount = albumMap[bucketId]!!.itemCount + 1)
                         albumMap[bucketId] = updatedAlbum
                     } else {
-                        albumMap[bucketId] = MediaItem(
+                        albumMap[bucketId] = MediaFolder(
+                            id = bucketId,
                             name = bucketName,
                             itemCount = 1,
                             thumbnailUri = mediaUri.toString(),

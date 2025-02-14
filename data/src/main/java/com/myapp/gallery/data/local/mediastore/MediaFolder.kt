@@ -2,14 +2,16 @@ package com.myapp.gallery.data.local.mediastore
 
 import com.myapp.gallery.domain.model.Album
 
-data class MediaItem(
+data class MediaFolder(
+    val id: Long,
     val name: String,
     val itemCount: Int,
     val thumbnailUri: String?
 )
 
-fun MediaItem.toAlbum(): Album {
+fun MediaFolder.toAlbum(): Album {
     return Album(
+        id = this.id,
         name = this.name,
         itemCount = this.itemCount,
         thumbnailUri = this.thumbnailUri,
