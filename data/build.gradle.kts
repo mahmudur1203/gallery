@@ -15,6 +15,8 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -34,6 +36,8 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+
 }
 
 dependencies {
@@ -42,11 +46,34 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.security.crypto.ktx)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
+
+    implementation(libs.javax.inject)
+    implementation(libs.androidx.media3.common.ktx)
+    implementation(libs.core.ktx)
+
+
 
     androidTestImplementation(libs.runner)
+    androidTestImplementation(project(":data"))
     androidTestUtil(libs.orchestrator)
+
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.truth)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.turbine)
+
+    androidTestImplementation(libs.coroutines.test)
+    androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.runner)
+    androidTestUtil(libs.orchestrator)
+
 
     testImplementation(project(":testing"))
     androidTestImplementation(project(":testing"))

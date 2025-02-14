@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.myapp.gallery.ui.albums.AlbumsScreen
+import com.myapp.gallery.screens.albums.AlbumsScreen
 
 
 @Composable

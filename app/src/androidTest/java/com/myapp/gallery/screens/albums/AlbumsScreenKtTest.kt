@@ -1,15 +1,14 @@
-package com.myapp.gallery.ui.albums
+package com.myapp.gallery.screens.albums
 
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
-import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.state.Resource
 import com.myapp.gallery.testing.data.albumsTestData
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -21,8 +20,16 @@ class AlbumsScreenKtTest{
     @get:Rule
     val composeTestRule = createComposeRule()
 
+
+    @Before
+    fun setup() {
+
+    }
+
     @Test
     fun albumsScreen_displaysLoadingIndicator_whenLoading() {
+
+
         composeTestRule.setContent {
             AlbumsScreenContent(Resource.Loading,{},{})
         }
@@ -38,6 +45,9 @@ class AlbumsScreenKtTest{
         composeTestRule.setContent {
             AlbumsScreenContent(Resource.Error("Error Test"),{},{})
         }
+
+
+        composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithTag("ErrorMessage").assertExists()
         composeTestRule.onNodeWithTag("RetryButton").assertExists()
@@ -57,7 +67,7 @@ class AlbumsScreenKtTest{
 
         composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("RetryButton").isDisplayed()
+        composeTestRule.onNodeWithTag("RetryButton").assertExists()
         composeTestRule.onNodeWithTag("RetryButton").performClick()
 
         verify(mockOnRetryClick, times(1)).run()
@@ -72,7 +82,7 @@ class AlbumsScreenKtTest{
             AlbumsScreenContent(Resource.Success(albumsTestData), {} , {})
         }
 
-        composeTestRule.onNodeWithTag("AlbumItem_Album 1").isDisplayed()
+        composeTestRule.onNodeWithTag("AlbumItem_Album 1").assertExists()
 
         composeTestRule.onNodeWithTag("AlbumList").performScrollToIndex(20)
         composeTestRule.onNodeWithTag("AlbumItem_Album 19").isDisplayed()

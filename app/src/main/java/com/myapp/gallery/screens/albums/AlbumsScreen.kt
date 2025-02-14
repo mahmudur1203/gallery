@@ -1,7 +1,6 @@
-package com.myapp.gallery.ui.albums
+package com.myapp.gallery.screens.albums
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,30 +23,41 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberAsyncImagePainter
+import com.github.panpf.sketch.AsyncImage
+import com.github.panpf.sketch.LocalPlatformContext
+import com.github.panpf.sketch.SingletonSketch
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.state.Resource
 import java.text.NumberFormat
 import java.util.Locale
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun AlbumsScreen(viewModel: AlbumsViewModel = hiltViewModel()) {
+
+    LaunchedEffect(Unit) {
+        if (viewModel.albums.value == Resource.Empty) {
+            viewModel.fetchAlbums()
+        }
+    }
 
     val albums by viewModel.albums.collectAsState()
 
@@ -55,7 +65,6 @@ fun AlbumsScreen(viewModel: AlbumsViewModel = hiltViewModel()) {
         onAlbumClick = {},
         onRetryClick = { viewModel.fetchAlbums() })
 
-    // Content(message = message, onClickButton = { viewModel.message.value = "Button clicked clicked" })
 }
 
 @Composable
@@ -64,6 +73,7 @@ fun AlbumsScreenContent(
     onAlbumClick: (Album) -> Unit,
     onRetryClick: () -> Unit
 ) {
+
 
     Scaffold(
         topBar = {
@@ -119,6 +129,8 @@ private fun ErrorMessage(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+
+
         Button(
             modifier = Modifier.testTag("RetryButton"),
             onClick = { onRetryClick() }) {
@@ -136,7 +148,10 @@ fun TopBar(title: String) {
 
     TopAppBar(
         title = {
-            Text(text = title)
+            Text(
+                modifier = Modifier.testTag("AlbumTitle"),
+                text = title
+            )
         },
 
         actions = {
@@ -169,6 +184,8 @@ fun AlbumList(albums: List<Album>, onAlbumClick: (Album) -> Unit) {
 
 @Composable
 fun AlbumItem(album: Album, onAlbumClick: (Album) -> Unit) {
+
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -182,14 +199,22 @@ fun AlbumItem(album: Album, onAlbumClick: (Album) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color.LightGray)
         ) {
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                contentDescription = "Album Thumbnail",
+
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .clip(RoundedCornerShape(12.dp)),
+
+                uri = album.thumbnailUri.toString(),
+                contentDescription = album.name,
                 contentScale = ContentScale.Crop,
-                painter = rememberAsyncImagePainter(album.thumbnailUri),
+                sketch = SingletonSketch.get(LocalPlatformContext.current)
             )
 
         }
@@ -205,3 +230,4 @@ fun AlbumItem(album: Album, onAlbumClick: (Album) -> Unit) {
         }
     }
 }
+

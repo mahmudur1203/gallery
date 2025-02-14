@@ -55,6 +55,8 @@ dependencies {
     implementation(project(":data"))
 
 
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -64,6 +66,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.accompanist.permissions)
 
 
     implementation(libs.kotlinx.coroutines.core)
@@ -95,6 +98,16 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     androidTestImplementation(libs.runner)
     androidTestUtil(libs.orchestrator)
+
+
+    implementation(libs.sketch.compose)
+    implementation(libs.sketch.extensions.compose)
+    implementation(libs.sketch.video)
+    implementation(libs.sketch.animated.gif)
+    implementation(libs.sketch.animated.heif)
+    implementation(libs.sketch.animated.webp)
+    implementation(libs.sketch.svg)
+    implementation(libs.sketch.http.ktor)
 
     kover(project(":domain"))
     kover(project(":data"))
@@ -137,7 +150,9 @@ kover {
                     "*.extensions",
                     "*.state\$.*",
                     "com.myapp.gallery.BuildConfig",
-                    "com.myapp.gallery.testing"
+                    "com.myapp.gallery.testing",
+                    "com.myapp.gallery.extentions",
+                    "com.myapp.gallery.util"
                 )
             }
         }

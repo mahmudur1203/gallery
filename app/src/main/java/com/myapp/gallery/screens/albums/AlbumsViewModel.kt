@@ -1,4 +1,4 @@
-package com.myapp.gallery.ui.albums
+package com.myapp.gallery.screens.albums
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,7 +20,7 @@ class AlbumsViewModel @Inject constructor(
     val albums: StateFlow<Resource<List<Album>>> = _albums
 
     init {
-        fetchAlbums()
+        //fetchAlbums()
     }
 
     fun fetchAlbums() {
