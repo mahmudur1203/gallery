@@ -1,8 +1,8 @@
 package com.myapp.gallery.di
 
 import com.myapp.gallery.data.local.mediastore.MediaStoreDataSource
-import com.myapp.gallery.data.repository.AlbumRepositoryImpl
-import com.myapp.gallery.domain.repository.AlbumRepository
+import com.myapp.gallery.data.repository.GalleryRepositoryImpl
+import com.myapp.gallery.domain.repository.GalleryRepository
 import com.myapp.gallery.util.DispatchersProvider
 import dagger.Module
 import dagger.Provides
@@ -17,8 +17,8 @@ class RepositoryModuleModule {
     fun provideAlbumRepository(
         dataSource: MediaStoreDataSource,
         dispatchersProvider: DispatchersProvider
-    ): AlbumRepository {
-        return AlbumRepositoryImpl(
+    ): GalleryRepository {
+        return GalleryRepositoryImpl(
             mediaStoreDataSource = dataSource,
             coroutineContext = dispatchersProvider.io
         )

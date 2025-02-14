@@ -2,10 +2,9 @@ package com.myapp.gallery.screens.medialist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.model.Media
 import com.myapp.gallery.domain.state.Resource
-import com.myapp.gallery.domain.usecase.GetMediaUseCase
+import com.myapp.gallery.domain.usecase.GetMediaListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MediaListViewModel @Inject constructor(private val getMediaUseCase: GetMediaUseCase) : ViewModel() {
+class MediaListViewModel @Inject constructor(private val getMediaListUseCase: GetMediaListUseCase) : ViewModel() {
 
     private val _medias = MutableStateFlow<Resource<List<Media>>>(Resource.Empty)
     val medias: StateFlow<Resource<List<Media>>> = _medias
@@ -27,7 +26,7 @@ class MediaListViewModel @Inject constructor(private val getMediaUseCase: GetMed
 
         viewModelScope.launch {
 
-            getMediaUseCase(albumId).collect {
+            getMediaListUseCase(albumId).collect {
                 _medias.value = it
             }
 

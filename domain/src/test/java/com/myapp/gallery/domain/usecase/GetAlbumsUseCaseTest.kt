@@ -2,7 +2,7 @@ package com.myapp.gallery.domain.usecase
 
 import com.google.common.truth.Truth.assertThat
 import com.myapp.gallery.domain.model.Album
-import com.myapp.gallery.domain.repository.AlbumRepository
+import com.myapp.gallery.domain.repository.GalleryRepository
 import com.myapp.gallery.domain.state.Resource
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -15,7 +15,7 @@ import org.mockito.kotlin.whenever
 
 class GetAlbumsUseCaseTest {
 
-    private val albumRepository = mock<AlbumRepository>()
+    private val galleryRepository = mock<GalleryRepository>()
     private lateinit var getAlbumUseCase: GetAlbumsUseCase
 
 
@@ -23,13 +23,13 @@ class GetAlbumsUseCaseTest {
     private val errorResult = Resource.Error("Error")
 
     @Test
-    fun `albums data should be fetched from albumRepository`(): Unit = runBlocking {
+    fun `albums data should be fetched from repository`(): Unit = runBlocking {
 
         getAlbumUseCase = mockSuccessfulCase()
 
         getAlbumUseCase()
 
-        verify(albumRepository, times(1)).getAlbums()
+        verify(galleryRepository, times(1)).getAlbums()
 
     }
 
@@ -54,19 +54,19 @@ class GetAlbumsUseCaseTest {
     }
 
     private suspend fun mockSuccessfulCase() : GetAlbumsUseCase {
-        whenever(albumRepository.getAlbums()).thenReturn(
+        whenever(galleryRepository.getAlbums()).thenReturn(
             flow { emit(successResult) }
         )
 
-        return GetAlbumsUseCase(albumRepository)
+        return GetAlbumsUseCase(galleryRepository)
     }
 
     private suspend fun mockErrorCase() : GetAlbumsUseCase {
-        whenever(albumRepository.getAlbums()).thenReturn(
+        whenever(galleryRepository.getAlbums()).thenReturn(
             flow { emit(errorResult) }
         )
 
-        return GetAlbumsUseCase(albumRepository)
+        return GetAlbumsUseCase(galleryRepository)
     }
 
 }

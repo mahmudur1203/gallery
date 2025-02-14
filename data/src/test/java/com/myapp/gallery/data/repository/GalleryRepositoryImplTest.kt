@@ -4,7 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
 import com.myapp.gallery.data.CoroutineTestRule
 import com.myapp.gallery.data.local.mediastore.MediaStoreDataSource
-import com.myapp.gallery.domain.repository.AlbumRepository
+import com.myapp.gallery.domain.repository.GalleryRepository
 import com.myapp.gallery.domain.state.Resource
 import com.myapp.gallery.testing.data.mediaFolderListTestData
 import kotlinx.coroutines.flow.first
@@ -16,7 +16,7 @@ import org.mockito.Mockito.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-class AlbumRepositoryImplTest{
+class GalleryRepositoryImplTest{
 
     @get:Rule
     val coroutinesRule = CoroutineTestRule()
@@ -25,7 +25,7 @@ class AlbumRepositoryImplTest{
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
 
-    private lateinit var albumRepository : AlbumRepository
+    private lateinit var galleryRepository : GalleryRepository
 
     private val mediaStoreDataSource  = mock<MediaStoreDataSource>()
     private val exception = Exception("Error")
@@ -34,9 +34,9 @@ class AlbumRepositoryImplTest{
     @Test
     fun `media item should be fetched from mediaStoreDataSource`() : Unit = runBlocking {
 
-        albumRepository = mockErrorCase()
+        galleryRepository = mockErrorCase()
 
-        albumRepository.getAlbums().first()
+        galleryRepository.getAlbums().first()
 
         verify(mediaStoreDataSource,times(1)).getAlbums()
 
@@ -45,9 +45,9 @@ class AlbumRepositoryImplTest{
     @Test
     fun `emit success when media item fetched successfully from mediaStoreDataSource`() : Unit = runBlocking {
 
-        albumRepository = mockSuccessfulCase()
+        galleryRepository = mockSuccessfulCase()
 
-        val result = albumRepository.getAlbums().first()
+        val result = galleryRepository.getAlbums().first()
 
         assertThat(result.isSuccess).isTrue()
 
@@ -60,33 +60,33 @@ class AlbumRepositoryImplTest{
     @Test
     fun `emit error when mediaStoreDataSource throws exception`() = runBlocking{
 
-        albumRepository = mockErrorCase()
+        galleryRepository = mockErrorCase()
 
-        val result = albumRepository.getAlbums().first()
+        val result = galleryRepository.getAlbums().first()
 
         assertThat(result.isError).isTrue()
 
     }
 
-    private suspend fun mockSuccessfulCase() : AlbumRepository {
+    private suspend fun mockSuccessfulCase() : GalleryRepository {
 
         whenever(mediaStoreDataSource.getAlbums()).thenReturn(
             Result.success(mediaFolderListTestData)
         )
 
-        return  AlbumRepositoryImpl(
+        return  GalleryRepositoryImpl(
             mediaStoreDataSource,
             coroutinesRule.dispatcher
         )
     }
 
-    private suspend fun mockErrorCase() : AlbumRepository {
+    private suspend fun mockErrorCase() : GalleryRepository {
 
         whenever(mediaStoreDataSource.getAlbums()).thenReturn(
             Result.failure(exception)
         )
 
-        return AlbumRepositoryImpl(mediaStoreDataSource,
+        return GalleryRepositoryImpl(mediaStoreDataSource,
             coroutinesRule.dispatcher)
 
     }

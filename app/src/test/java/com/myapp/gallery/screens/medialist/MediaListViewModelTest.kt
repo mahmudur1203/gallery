@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.myapp.gallery.BaseUnitTest
 import com.myapp.gallery.domain.model.Media
 import com.myapp.gallery.domain.state.Resource
-import com.myapp.gallery.domain.usecase.GetMediaUseCase
+import com.myapp.gallery.domain.usecase.GetMediaListUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
@@ -17,7 +17,7 @@ import org.mockito.kotlin.whenever
 class MediaListViewModelTest : BaseUnitTest(){
 
     private lateinit var viewModel: MediaListViewModel
-    private val getMediaUseCase = mock<GetMediaUseCase>()
+    private val getMediaListUseCase = mock<GetMediaListUseCase>()
 
     private val successResult = Resource.Success<List<Media>>(listOf(mock()))
     private val errorResult = Resource.Error("Error")
@@ -25,11 +25,11 @@ class MediaListViewModelTest : BaseUnitTest(){
     @Test
     fun `media items should be fetched from getMediaUseCase`(): Unit = runBlocking {
 
-        viewModel = MediaListViewModel(getMediaUseCase)
+        viewModel = MediaListViewModel(getMediaListUseCase)
 
         viewModel.fetchMedias(1)
 
-        verify(getMediaUseCase,times(1)).invoke(1)
+        verify(getMediaListUseCase,times(1)).invoke(1)
 
     }
 
@@ -57,20 +57,20 @@ class MediaListViewModelTest : BaseUnitTest(){
     }
 
     private suspend fun mockErrorCase(): MediaListViewModel {
-        whenever(getMediaUseCase.invoke(1)).thenReturn(
+        whenever(getMediaListUseCase.invoke(1)).thenReturn(
             flow { emit(errorResult) })
 
-        return MediaListViewModel(getMediaUseCase)
+        return MediaListViewModel(getMediaListUseCase)
 
     }
 
 
     private suspend fun mockSuccessfulCase() : MediaListViewModel {
 
-        whenever(getMediaUseCase.invoke(1)).thenReturn(
+        whenever(getMediaListUseCase.invoke(1)).thenReturn(
             flow { emit(successResult) })
 
-        return MediaListViewModel(getMediaUseCase)
+        return MediaListViewModel(getMediaListUseCase)
     }
 
 

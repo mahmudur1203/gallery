@@ -1,17 +1,40 @@
-package com.myapp.gallery.domain.usecase
+package com.myapp.gallery.data.repository
 
+import com.myapp.gallery.data.local.mediastore.MediaStoreDataSource
+import com.myapp.gallery.data.local.mediastore.toAlbum
+import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.model.Media
+import com.myapp.gallery.domain.repository.GalleryRepository
 import com.myapp.gallery.domain.state.Resource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
+import kotlinx.coroutines.flow.flowOn
+import kotlin.coroutines.CoroutineContext
 
-class GetMediaUseCase @Inject constructor() {
+class GalleryRepositoryImpl(
+    private val mediaStoreDataSource: MediaStoreDataSource,
+    private val coroutineContext: CoroutineContext
+) : GalleryRepository {
+    override suspend fun getAlbums(): Flow<Resource<List<Album>>> {
 
-    suspend operator fun invoke(albumId: Long): Flow<Resource<List<Media>>> {
+        return flow {
+
+            val result = mediaStoreDataSource.getAlbums();
+
+            result.onSuccess { mediaItems ->
+                val albums = mediaItems.map { it.toAlbum() }
+                emit(Resource.Success(albums))
+            }.onFailure {
+                emit(Resource.Error("Unexpected error occurred while fetching albums"))
+            }
+
+        }.flowOn(coroutineContext)
 
 
+    }
+
+    override suspend fun getMediaListByAlbumId(albumId: Long): Flow<Resource<List<Media>>> {
         delay(2000)
 
         return flow {
@@ -51,4 +74,5 @@ class GetMediaUseCase @Inject constructor() {
 
         }
     }
+
 }
