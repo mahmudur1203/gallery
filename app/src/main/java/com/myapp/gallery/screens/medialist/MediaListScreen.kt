@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -41,6 +42,7 @@ import com.myapp.gallery.domain.state.Resource
 import com.myapp.gallery.screens.albums.ErrorMessage
 import com.myapp.gallery.util.Utils
 
+
 @Composable
 fun MediaListScreen(
     viewModel: MediaListViewModel = hiltViewModel(),
@@ -48,6 +50,7 @@ fun MediaListScreen(
     albumName: String,
     navController: NavHostController
 ) {
+
 
     LaunchedEffect(Unit) {
         if (viewModel.medias.value == Resource.Empty) {
@@ -106,11 +109,14 @@ fun MediaListScreenContent(
 
 @Composable
 fun MediaList(medias: List<Media>, onAlbumClick: (Media) -> Unit) {
+
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
         modifier = Modifier
             .fillMaxSize()
-            .testTag("MediaList"),
+            .testTag("MediaList")
+        /*.clipToBounds()*/,
         contentPadding = PaddingValues(horizontal = 1.dp, vertical = 1.dp)
 
     ) {
@@ -118,6 +124,7 @@ fun MediaList(medias: List<Media>, onAlbumClick: (Media) -> Unit) {
             MediaItem(album, onAlbumClick)
         }
     }
+
 }
 
 @Composable
@@ -132,7 +139,8 @@ fun MediaItem(media: Media, onAlbumClick: (Media) -> Unit) {
 
 
         AsyncImage(
-            modifier = Modifier.testTag("Media_" + media.id)
+            modifier = Modifier
+                .testTag("Media_" + media.id)
                 .fillMaxSize()
 //                .border(
 //                    width = 1.dp,
@@ -145,7 +153,9 @@ fun MediaItem(media: Media, onAlbumClick: (Media) -> Unit) {
             uri = media.uri.toString(),
             contentDescription = media.name,
             contentScale = ContentScale.Crop,
-            sketch = SingletonSketch.get(LocalPlatformContext.current)
+            sketch = SingletonSketch.get(LocalPlatformContext.current),
+            filterQuality = FilterQuality.None,
+            clipToBounds = true
         )
 
 

@@ -1,4 +1,4 @@
-package com.myapp.gallery.data.local.mediastore
+package com.myapp.gallery.data.local.mediastore.model
 
 import com.myapp.gallery.domain.model.Album
 

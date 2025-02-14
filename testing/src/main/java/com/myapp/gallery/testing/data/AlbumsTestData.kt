@@ -1,6 +1,6 @@
 package com.myapp.gallery.testing.data
 
-import com.myapp.gallery.data.local.mediastore.MediaFolder
+import com.myapp.gallery.data.local.mediastore.model.MediaFolder
 import com.myapp.gallery.domain.model.Album
 
 val albumsTestData = listOf(
