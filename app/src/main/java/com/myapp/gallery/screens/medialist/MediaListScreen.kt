@@ -5,23 +5,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,9 +27,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
@@ -71,6 +66,8 @@ fun MediaListScreen(
 
     val mediaResource by viewModel.medias.collectAsState()
 
+    var selectedMedia by remember { mutableStateOf<Media?>(null) }
+
     Scaffold(
         topBar = {
             TopBar(title = albumName, onBackClick = { navController.popBackStack() })
@@ -84,11 +81,23 @@ fun MediaListScreen(
             ) {
 
                 MediaListScreenContent(mediaResource,
-                    onAlbumClick = {
-                        // todo: navigate to media
+                    onItemClick = {
+                        selectedMedia = it
                     },
                     onRetryClick = { viewModel.fetchMedias(albumId) })
 
+
+                selectedMedia?.let { media ->
+
+                    if(mediaResource is Resource.Success<List<Media>> ){
+                        val mediaList = (mediaResource as Resource.Success<List<Media>>).data
+                        FullScreenMediaViewer(mediaList,
+                            mediaList.indexOf(media)) {
+                            selectedMedia = null
+                        }
+                    }
+
+                }
             }
         }
     )
@@ -98,7 +107,7 @@ fun MediaListScreen(
 @Composable
 fun MediaListScreenContent(
     mediasResource: Resource<List<Media>>,
-    onAlbumClick: (Media) -> Unit,
+    onItemClick: (Media) -> Unit,
     onRetryClick: () -> Unit
 ) {
     when (mediasResource) {
@@ -111,7 +120,7 @@ fun MediaListScreenContent(
         }
 
         is Resource.Success -> {
-            MediaList(mediasResource.data, onAlbumClick)
+            MediaList(mediasResource.data, onItemClick)
         }
 
         Resource.Empty -> {}

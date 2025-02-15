@@ -69,7 +69,6 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
     implementation(libs.accompanist.permissions)
 
-
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.compose.navigation)
