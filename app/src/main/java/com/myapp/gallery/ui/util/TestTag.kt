@@ -2,6 +2,7 @@ package com.myapp.gallery.ui.util
 
 object TestTag {
     const val LOADING_INDICATOR = "LoadingIndicator"
+    const val ALBUMS_SCREEN = "AlbumsScreen"
     const val ERROR_MESSAGE = "ErrorMessage"
     const val RETRY_BUTTON = "RetryButton"
     const val TITLE = "Title"

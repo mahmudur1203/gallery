@@ -1,5 +1,7 @@
 package com.myapp.gallery
 
+import com.myapp.gallery.util.DispatchersProvider
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestDispatcher
@@ -10,12 +12,25 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CoroutineTestRule constructor(val dispatcher: TestDispatcher = UnconfinedTestDispatcher()) :
+class CoroutineTestRule constructor(var testDispatcher: TestDispatcher = UnconfinedTestDispatcher()) :
     TestWatcher() {
+
+    val testDispatcherProvider = object : DispatchersProvider {
+
+        override val io: CoroutineDispatcher
+            get() = testDispatcher
+
+        override val main: CoroutineDispatcher
+            get() = testDispatcher
+
+        override val default: CoroutineDispatcher
+            get() = testDispatcher
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun starting(description: Description?) {
         super.starting(description)
-        Dispatchers.setMain(dispatcher)
+        Dispatchers.setMain(testDispatcher)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

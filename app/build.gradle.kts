@@ -47,6 +47,15 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        unitTests {
+            // Robolectric resource processing/loading https://github.com/robolectric/robolectric/pull/4736
+            isIncludeAndroidResources = true
+        }
+        // Disable device's animation for instrument testing
+        // animationsDisabled = true
+    }
 }
 
 dependencies {
@@ -80,6 +89,15 @@ dependencies {
 
     implementation(libs.timber)
 
+    implementation(libs.sketch.compose)
+    implementation(libs.sketch.extensions.compose)
+    implementation(libs.sketch.video)
+    implementation(libs.sketch.animated.gif)
+    implementation(libs.sketch.animated.heif)
+    implementation(libs.sketch.animated.webp)
+    implementation(libs.sketch.svg)
+    implementation(libs.sketch.http.ktor)
+
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
@@ -100,15 +118,11 @@ dependencies {
     androidTestImplementation(libs.runner)
     androidTestUtil(libs.orchestrator)
 
+    testImplementation(libs.truth)
 
-    implementation(libs.sketch.compose)
-    implementation(libs.sketch.extensions.compose)
-    implementation(libs.sketch.video)
-    implementation(libs.sketch.animated.gif)
-    implementation(libs.sketch.animated.heif)
-    implementation(libs.sketch.animated.webp)
-    implementation(libs.sketch.svg)
-    implementation(libs.sketch.http.ktor)
+    testImplementation(libs.androidx.ui.test.junit4)
+    testImplementation(libs.test.robolectric)
+
 
     kover(project(":domain"))
     kover(project(":data"))

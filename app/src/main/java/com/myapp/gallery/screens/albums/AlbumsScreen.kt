@@ -74,6 +74,7 @@ fun AlbumsScreen(viewModel: AlbumsViewModel = hiltViewModel(),
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        modifier = Modifier.testTag(TestTag.ALBUMS_SCREEN),
         topBar = {
             TopBar(title = "Albums",
                 uiState = uiState,

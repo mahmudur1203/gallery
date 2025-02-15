@@ -96,6 +96,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 test-robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
+
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockito-inline" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
