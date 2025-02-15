@@ -11,11 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,20 +29,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.github.panpf.sketch.AsyncImage
-import com.github.panpf.sketch.LocalPlatformContext
 import com.github.panpf.sketch.SingletonSketch
+import com.github.panpf.sketch.request.ImageRequest
+import com.github.panpf.sketch.state.ThumbnailMemoryCacheStateImage
 import com.myapp.gallery.domain.model.Media
 import com.myapp.gallery.domain.state.Resource
-import com.myapp.gallery.screens.albums.ErrorMessage
+import com.myapp.gallery.ui.components.ErrorMessage
+import com.myapp.gallery.ui.components.ShimmerLoader
+import com.myapp.gallery.ui.util.ContentDescriptions
+import com.myapp.gallery.ui.util.TestTag
 import com.myapp.gallery.util.Utils
 
 
@@ -57,15 +58,11 @@ fun MediaListScreen(
     navController: NavHostController
 ) {
 
-
-    LaunchedEffect(Unit) {
-        if (viewModel.medias.value == Resource.Empty) {
-            viewModel.fetchMedias(albumId)
-        }
+    LaunchedEffect(albumId) {
+        viewModel.fetchMedias(albumId)
     }
 
     val mediaResource by viewModel.medias.collectAsState()
-
     var selectedMedia by remember { mutableStateOf<Media?>(null) }
 
     Scaffold(
@@ -81,12 +78,15 @@ fun MediaListScreen(
             ) {
 
                 MediaListScreenContent(mediaResource,
-                    onItemClick = {
+                    onClickItem = {
                         selectedMedia = it
                     },
-                    onRetryClick = { viewModel.fetchMedias(albumId) })
+                    onRetryClick = {
+                        viewModel.fetchMedias(albumId)
+                    }
+                )
 
-
+                // Show image/video on selection
                 selectedMedia?.let { media ->
 
                     if(mediaResource is Resource.Success<List<Media>> ){
@@ -107,20 +107,25 @@ fun MediaListScreen(
 @Composable
 fun MediaListScreenContent(
     mediasResource: Resource<List<Media>>,
-    onItemClick: (Media) -> Unit,
+    onClickItem: (Media) -> Unit,
     onRetryClick: () -> Unit
 ) {
     when (mediasResource) {
         Resource.Loading -> {
-            CircularProgressIndicator(modifier = Modifier.testTag("LoadingIndicator"))
+
+            //Show shimmer effect while loading
+            ShimmerGridLoader(modifier = Modifier.testTag(TestTag.LOADING_INDICATOR))
         }
 
         is Resource.Error -> {
-            ErrorMessage(mediasResource.message, onRetryClick)
+
+            // Show error message with retry button
+            ErrorMessage(mediasResource.message, onRetryClick = onRetryClick)
         }
 
         is Resource.Success -> {
-            MediaList(mediasResource.data, onItemClick)
+            // Display media list in Grid
+            MediaList(mediasResource.data, onClickItem = onClickItem)
         }
 
         Resource.Empty -> {}
@@ -130,26 +135,23 @@ fun MediaListScreenContent(
 @Composable
 fun MediaList(medias: List<Media>, onClickItem: (Media) -> Unit) {
 
-    val listState = rememberLazyGridState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
-            state = listState,
             columns = GridCells.Adaptive(minSize = 80.dp),
             modifier = Modifier
-
                 .fillMaxSize()
-                .testTag("MediaList")
-                .clipToBounds(),
+                .testTag(TestTag.MEDIA_LIST),
             contentPadding = PaddingValues(horizontal = 1.dp, vertical = 1.dp)
 
         ) {
-
             items(medias, key = { it.id }) { media ->
                 MediaItem(media, onClickItem)
+//                LaunchedEffect(media.uri) {
+//                    sketch.preload(uri = media.uri)
+//                }
             }
         }
-
 
     }
 
@@ -157,45 +159,23 @@ fun MediaList(medias: List<Media>, onClickItem: (Media) -> Unit) {
 
 
 @Composable
-fun MediaItem(media: Media, onAlbumClick: (Media) -> Unit) {
-
-
-    // val url = remember(media) { media.getUri().toString() }
+fun MediaItem(media: Media, onClickItem: (Media) -> Unit) {
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-
             .aspectRatio(1f)
             .padding(0.75.dp)
+            .testTag( TestTag.MEDIA_ITEM_PREFIX + media.id)
             .background(
                 color = MaterialTheme.colorScheme.surfaceContainerHigh
             )
 
     ) {
 
-
-        AsyncImage(
-            modifier = Modifier
-                .testTag("Media_" + media.id)
-                .fillMaxSize()
-//                .border(
-//                    width = 1.dp,
-//                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-//                    //shape = RoundedCornerShape(12.dp)
-//                )
-
-                .clickable {
-                    onAlbumClick(media)
-                },
-            uri = media.uri.toString(),
-            contentDescription = media.name,
-            contentScale = ContentScale.Crop,
-            sketch = SingletonSketch.get(LocalPlatformContext.current),
-            filterQuality = FilterQuality.None,
-            clipToBounds = true
-        )
-
+        ImageItem(media.uri, onClickItem = {
+            onClickItem(media)
+        })
 
         if (media.isVideo) {
             Text(
@@ -212,6 +192,34 @@ fun MediaItem(media: Media, onAlbumClick: (Media) -> Unit) {
 
 }
 
+@Composable
+fun ImageItem(uri: String, onClickItem: () -> Unit) {
+
+    val request = ImageRequest(LocalContext.current, uri)
+    {
+        placeholder(ThumbnailMemoryCacheStateImage(uri))
+        crossfade(fadeStart = false)
+    }
+
+    val context = LocalContext.current
+    val sketch = remember { SingletonSketch.get(context) }
+
+    AsyncImage(
+        request = request,
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable {
+                onClickItem()
+            },
+        //uri = uri.toString(),
+        contentDescription = ContentDescriptions.MEDIA_IMAGE,
+        contentScale = ContentScale.Crop,
+        sketch = sketch,
+        filterQuality = FilterQuality.None,
+        clipToBounds = true
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(title: String, onBackClick: () -> Unit) {
@@ -219,7 +227,7 @@ fun TopBar(title: String, onBackClick: () -> Unit) {
     TopAppBar(
         title = {
             Text(
-                modifier = Modifier.testTag("MediaListTitle"),
+                modifier = Modifier.testTag(TestTag.TITLE),
                 text = title
             )
         },
@@ -228,21 +236,41 @@ fun TopBar(title: String, onBackClick: () -> Unit) {
             IconButton(onClick = { onBackClick() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = ContentDescriptions.BACK_BUTTON
                 )
             }
         },
-
-        actions = {
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = "Menu"
-                )
-            }
-        }
     )
 
 }
+
+@Composable
+fun ShimmerGridLoader(modifier: Modifier = Modifier) {
+
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 80.dp),
+        modifier = modifier
+            .fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 1.dp, vertical = 1.dp)
+    ) {
+
+        items(20) {
+            ShimmerLoader {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+
+                        .aspectRatio(1f)
+                        .padding(0.75.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        )
+                )
+            }
+        }
+    }
+}
+
+
 
 

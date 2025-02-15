@@ -13,16 +13,21 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import coil.compose.AsyncImage
+import com.github.panpf.sketch.SingletonSketch
+import com.github.panpf.sketch.request.ImageRequest
+import com.github.panpf.sketch.state.ThumbnailMemoryCacheStateImage
 import com.myapp.gallery.domain.model.Media
+import com.myapp.gallery.ui.util.ContentDescriptions
 
 
 @Composable
@@ -70,12 +75,23 @@ fun FullScreenMediaViewer(
                         )
                     } else {
 
-                        AsyncImage(
-                            model = media.uri,
-                            contentDescription = "Zoomable Media",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
+                        val context = LocalContext.current
+                        val sketch = remember { SingletonSketch.get(context) }
 
+                        val request = ImageRequest(LocalContext.current, media.uri)
+                        {
+                            placeholder(ThumbnailMemoryCacheStateImage(media.uri))
+                            crossfade(fadeStart = false)
+                        }
+
+                        com.github.panpf.sketch.AsyncImage(
+                            request = request,
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            //uri = uri.toString(),
+                            contentDescription = ContentDescriptions.MEDIA_IMAGE,
+                            contentScale = ContentScale.Fit,
+                            sketch = sketch
                         )
 
                     }
@@ -89,7 +105,7 @@ fun FullScreenMediaViewer(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = ContentDescriptions.CLOSE,
                         tint = Color.White
                     )
                 }

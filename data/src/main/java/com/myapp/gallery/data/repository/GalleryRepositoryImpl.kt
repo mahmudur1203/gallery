@@ -7,7 +7,6 @@ import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.model.Media
 import com.myapp.gallery.domain.repository.GalleryRepository
 import com.myapp.gallery.domain.state.Resource
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn

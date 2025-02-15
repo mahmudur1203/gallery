@@ -19,14 +19,24 @@ val availableSortTypes = listOf(
     SortType.COUNT
 )
 
+sealed class AlbumsUiState {
+    data object Loading : AlbumsUiState()
+    data class Success(
+        val albums: List<Album>,
+        val sortType: SortType = SortType.TIME,
+        val layoutOrientation: LayoutOrientation = LayoutOrientation.GRID
+    ) : AlbumsUiState()
+
+    data class Error(val message: String) : AlbumsUiState()
+}
+
 @HiltViewModel
 class AlbumsViewModel @Inject constructor(
     private val getAlbumsUseCase: GetAlbumsUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<AlbumsUiState>(AlbumsUiState.Nothing)
+    private val _uiState = MutableStateFlow<AlbumsUiState>(AlbumsUiState.Loading)
     val uiState: StateFlow<AlbumsUiState> = _uiState
-
 
 
     init {
@@ -35,30 +45,32 @@ class AlbumsViewModel @Inject constructor(
 
     fun fetchAlbums() {
 
-        if(_uiState.value == AlbumsUiState.Nothing){
-            _uiState.value = AlbumsUiState.Loading
-        }
+        _uiState.value = AlbumsUiState.Loading
 
         viewModelScope.launch {
 
-            getAlbumsUseCase().collect { it ->
+            getAlbumsUseCase().collect { result ->
 
-                when(it){
+                when (result) {
                     is Resource.Loading -> {
                         _uiState.value = AlbumsUiState.Loading
                     }
                     is Resource.Success -> {
-                        _uiState.value = AlbumsUiState.Success(
-                            albums = sortAlbums(it.data, SortType.TIME),
-                            sortType = SortType.TIME,
-                            layoutOrientation = LayoutOrientation.GRID
-                        )
+
+                        if(result.data.isNotEmpty()){
+                            _uiState.value = AlbumsUiState.Success(
+                                albums = sortAlbums(result.data, SortType.TIME),
+                                sortType = SortType.TIME,
+                                layoutOrientation = LayoutOrientation.GRID
+                            )
+                        }else{
+                            _uiState.value = AlbumsUiState.Error("No Albums Found")
+                        }
                     }
                     is Resource.Error -> {
-                        _uiState.value = AlbumsUiState.Error(it.message)
+                        _uiState.value = AlbumsUiState.Error(result.message)
                     }
                     else -> {
-                        _uiState.value = AlbumsUiState.Nothing
                     }
                 }
 
@@ -98,13 +110,3 @@ class AlbumsViewModel @Inject constructor(
     }
 }
 
-sealed class AlbumsUiState {
-    data object Loading : AlbumsUiState()
-    data class Success(
-        val albums: List<Album>,
-        val sortType: SortType = SortType.TIME,
-        val layoutOrientation: LayoutOrientation = LayoutOrientation.GRID
-    ) : AlbumsUiState()
-    data class Error(val message: String) : AlbumsUiState()
-    data object Nothing : AlbumsUiState()
-}

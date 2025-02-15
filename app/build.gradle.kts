@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.compose.material.icons.extended)
     implementation(libs.accompanist.permissions)
+    implementation(libs.compose.shimmer)
 
     implementation(libs.kotlinx.coroutines.core)
 
@@ -152,7 +153,8 @@ kover {
                     "com.myapp.gallery.BuildConfig",
                     "com.myapp.gallery.testing",
                     "com.myapp.gallery.extentions",
-                    "com.myapp.gallery.util"
+                    "com.myapp.gallery.util",
+                    "com.myapp.gallery.ui"
                 )
             }
         }

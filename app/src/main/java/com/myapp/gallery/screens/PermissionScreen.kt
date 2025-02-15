@@ -101,28 +101,47 @@ fun PermissionsScreen(onPermissionGranted: () -> Unit) {
         }
     }
 
-
-    permissionDialog.forEach { permission ->
+    permissionDialog.firstOrNull()?.let { permission ->
         PermissionAlertDialog(
             neededPermission = permission,
-            onDismiss = { permissionDialog.remove(permission) },
+            onDismiss = { permissionDialog.remove(permission) },  // ✅ Remove current permission
             onOkClick = {
-                permissionDialog.remove(permission)
+                permissionDialog.remove(permission) // ✅ Remove before launching
                 multiplePermissionLauncher.launch(arrayOf(permission.permission))
             },
             onGoToAppSettingsClick = {
                 permissionDialog.remove(permission)
                 activity.goToAppSetting()
             },
-
             isPermissionDeclined = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 !activity.shouldShowRequestPermissionRationale(permission.permission)
             } else {
                 true
             }
-
         )
     }
+
+//    permissionDialog.forEach { permission ->
+//        PermissionAlertDialog(
+//            neededPermission = permission,
+//            onDismiss = { permissionDialog.remove(permission) },
+//            onOkClick = {
+//                permissionDialog.remove(permission)
+//                multiplePermissionLauncher.launch(arrayOf(permission.permission))
+//            },
+//            onGoToAppSettingsClick = {
+//                permissionDialog.remove(permission)
+//                activity.goToAppSetting()
+//            },
+//
+//            isPermissionDeclined = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                !activity.shouldShowRequestPermissionRationale(permission.permission)
+//            } else {
+//                true
+//            }
+//
+//        )
+//    }
 }
 
 

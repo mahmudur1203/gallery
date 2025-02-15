@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import com.myapp.gallery.domain.state.Resource
 import com.myapp.gallery.testing.data.mediaListTestData
+import com.myapp.gallery.ui.util.TestTag
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -52,14 +53,14 @@ class MediaListScreenKtTest {
         composeTestRule.waitForIdle()
 
         composeTestRule
-            .onNodeWithTag("ErrorMessage")
+            .onNodeWithTag(TestTag.ERROR_MESSAGE)
             .assertExists()
 
         composeTestRule
-            .onNodeWithTag("RetryButton")
+            .onNodeWithTag(TestTag.RETRY_BUTTON)
             .assertExists()
 
-        composeTestRule.onNodeWithTag("RetryButton").performClick()
+        composeTestRule.onNodeWithTag(TestTag.RETRY_BUTTON).performClick()
 
         verify(mockOnRetryClick, times(1)).run()
     }
@@ -76,13 +77,16 @@ class MediaListScreenKtTest {
         composeTestRule.waitForIdle()
 
         composeTestRule
-            .onNodeWithTag("MediaList")
+            .onNodeWithTag(TestTag.MEDIA_LIST)
             .assertExists()
 
+        val startIndex = 0;
+        val lastIndex = mediaListTestData.size - 1;
 
-        composeTestRule.onNodeWithTag("MediaList").performScrollToIndex(70)
-        composeTestRule.onNodeWithTag("Media_69").isDisplayed()
-
+        composeTestRule.onNodeWithTag(TestTag.MEDIA_LIST).performScrollToIndex(70)
+        composeTestRule.onNodeWithTag(TestTag.MEDIA_ITEM_PREFIX + mediaList[lastIndex].id).isDisplayed()
 
     }
+
+
 }

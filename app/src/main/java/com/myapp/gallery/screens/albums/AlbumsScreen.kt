@@ -1,8 +1,8 @@
 package com.myapp.gallery.screens.albums
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,10 +22,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ViewList
-import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.outlined.GridOn
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,41 +43,44 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.github.panpf.sketch.AsyncImage
-import com.github.panpf.sketch.LocalPlatformContext
 import com.github.panpf.sketch.SingletonSketch
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.github.panpf.sketch.request.ImageRequest
+import com.github.panpf.sketch.state.ThumbnailMemoryCacheStateImage
 import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.state.LayoutOrientation
 import com.myapp.gallery.domain.state.SortType
+import com.myapp.gallery.ui.components.ErrorMessage
+import com.myapp.gallery.ui.components.ShimmerLoader
+import com.myapp.gallery.ui.util.ContentDescriptions
+import com.myapp.gallery.ui.util.TestTag
 import java.text.NumberFormat
 import java.util.Locale
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun AlbumsScreen(viewModel: AlbumsViewModel = hiltViewModel(),
                  navController: NavHostController
 ) {
 
-
+    // Collect UI state from ViewModel
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
             TopBar(title = "Albums",
-                uiState,
+                uiState = uiState,
                 onSortSelected = { viewModel.updateSortType(it) },
                 onLayoutSelected = { viewModel.toggleLayoutType() },
                 onBackClick = { navController.popBackStack() })
         },
-
 
         content = { paddingValues ->
             Box(
@@ -90,7 +91,7 @@ fun AlbumsScreen(viewModel: AlbumsViewModel = hiltViewModel(),
             ) {
 
                 AlbumsScreenContent(
-                    uiState,
+                    uiState = uiState,
                     onAlbumClick = {
                         navController.navigate("media_list/${it.id}/${it.name}")
                     },
@@ -109,61 +110,37 @@ fun AlbumsScreenContent(
     onRetryClick: () -> Unit
 ) {
 
+
     when (uiState) {
         AlbumsUiState.Loading -> {
-            CircularProgressIndicator(modifier = Modifier.testTag("LoadingIndicator"))
+
+            // Show shimmer effect while loading
+            ShimmerGridLoader(
+                modifier = Modifier.testTag(TestTag.LOADING_INDICATOR)
+            )
         }
 
         is AlbumsUiState.Error -> {
-            ErrorMessage(uiState.message, onRetryClick)
+
+            // Show error message with retry button
+            ErrorMessage(uiState.message, onRetryClick = onRetryClick)
         }
 
         is AlbumsUiState.Success -> {
 
-            if (uiState.layoutOrientation == LayoutOrientation.LIST) {
-                AlbumList(uiState.albums, onAlbumClick)
-            } else {
-                AlbumGrid(uiState.albums, onAlbumClick)
+            // Display album list in either Grid or List format
+
+            when (uiState.layoutOrientation) {
+                LayoutOrientation.LIST -> AlbumList(uiState.albums, onAlbumClick)
+                LayoutOrientation.GRID -> AlbumGrid(uiState.albums, onAlbumClick)
             }
 
         }
 
-        else -> {}
     }
 
 }
 
-@Composable
-fun ErrorMessage(
-    message: String,
-    onRetryClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            modifier = Modifier
-                .testTag("ErrorMessage")
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally),
-            text = message,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-
-        Button(
-            modifier = Modifier.testTag("RetryButton"),
-            onClick = { onRetryClick() }) {
-            Text(
-                text = "Tap to retry"
-            )
-        }
-    }
-}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -179,25 +156,32 @@ fun TopBar(
     if (uiState is AlbumsUiState.Success) {
         TopAppBar(title = {
             Text(
-                modifier = Modifier.testTag("AlbumTitle"), text = title
+                modifier = Modifier.testTag(TestTag.TOP_BAR), text = title
             )
         },
 
             actions = {
+
+                // Toggle Grid/List View Button
                 IconButton(onClick = {
                     onLayoutSelected()
                 }) {
                     Icon(
-                        imageVector = if (uiState.layoutOrientation == LayoutOrientation.GRID) Icons.AutoMirrored.Outlined.ViewList else Icons.Filled.GridView,
-                        contentDescription = "Toggle View"
+                        imageVector = if (uiState.layoutOrientation == LayoutOrientation.GRID)
+                            Icons.AutoMirrored.Outlined.ViewList
+                        else
+                            Icons.Outlined.GridOn,
+                        contentDescription = ContentDescriptions.TOGGLE_VIEW
                     )
                 }
 
+                // Sort Menu Dropdown
                 var expanded by remember { mutableStateOf(false) }
 
                 IconButton(onClick = { expanded = true }) {
                     Icon(
-                        imageVector = Icons.Filled.MoreVert, contentDescription = "Toggle View"
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = ContentDescriptions.MENU_ITEM
                     )
                 }
 
@@ -226,11 +210,9 @@ fun SortOptions(
 
             DropdownMenuItem(
                 onClick = {
-
                     onSortSelected(sort)
-
                 },
-                text = { Text(text = "Sort by" + " " + sort.name.lowercase()) },
+                text = { Text(text = "Sort by ${sort.name.lowercase()}") },
             )
         }
     }
@@ -244,7 +226,7 @@ fun AlbumGrid(albums: List<Album>, onAlbumClick: (Album) -> Unit) {
         columns = GridCells.Adaptive(minSize = 120.dp),
         modifier = Modifier
             .fillMaxSize()
-            .testTag("AlbumList"),
+            .testTag(TestTag.ALBUM_GRID),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
 
     ) {
@@ -257,10 +239,9 @@ fun AlbumGrid(albums: List<Album>, onAlbumClick: (Album) -> Unit) {
 @Composable
 fun AlbumList(albums: List<Album>, onAlbumClick: (Album) -> Unit) {
     LazyColumn(
-        //columns =GridCells.Adaptive(minSize = 120.dp),
         modifier = Modifier
             .fillMaxSize()
-            .testTag("AlbumList"),
+            .testTag(TestTag.ALBUM_LIST),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
 
     ) {
@@ -270,6 +251,34 @@ fun AlbumList(albums: List<Album>, onAlbumClick: (Album) -> Unit) {
     }
 }
 
+
+
+@Composable
+fun AlbumItemGrid(album: Album, onAlbumClick: (Album) -> Unit) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .testTag(TestTag.ALBUM_ITEM_PREFIX + album.id)
+    ) {
+
+        AlbumImage(album.thumbnailUri.toString(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f),
+            onItemClick = {
+                onAlbumClick(album)
+            })
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        AlbumInfo(name = album.name, itemCount = album.itemCount)
+
+    }
+}
+
+
 @Composable
 fun AlbumItemList(album: Album, onAlbumClick: (Album) -> Unit) {
 
@@ -277,102 +286,118 @@ fun AlbumItemList(album: Album, onAlbumClick: (Album) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .testTag("AlbumItem_" + album.name)
+            .testTag(TestTag.ALBUM_ITEM_PREFIX + album.id)
             .clickable(
                 onClick = {
                     onAlbumClick(album)
                 }
             )
     ) {
-        Box(
+
+        AlbumImage(album.thumbnailUri.toString(),
             modifier = Modifier
                 .width(120.dp)
-                .aspectRatio(1f)
-        ) {
-
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .clickable {
-                        //onAlbumClick(album)
-                    }
-                    .clip(RoundedCornerShape(12.dp)),
-
-                uri = album.thumbnailUri.toString(),
-                contentDescription = album.name,
-                contentScale = ContentScale.Crop,
-                sketch = SingletonSketch.get(LocalPlatformContext.current)
-            )
-        }
+                .aspectRatio(1f),
+            onItemClick = {
+                // full item clickable
+            })
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        val formattedCount =
-            NumberFormat.getNumberInstance(Locale.US).format(album.itemCount)
+        AlbumInfo(
+            name = album.name, itemCount = album.itemCount,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
 
-        Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-            Text(text = album.name, fontWeight = FontWeight.Medium)
-            Text(
-                text = formattedCount, modifier = Modifier.alpha(0.5f)
-            )
-        }
+
     }
 }
 
 @Composable
-fun AlbumItemGrid(album: Album, onAlbumClick: (Album) -> Unit) {
+fun AlbumImage(
+    uri: String,
+    modifier: Modifier = Modifier,
+    onItemClick: () -> Unit
+) {
+
+    val request = ImageRequest(LocalContext.current, uri)
+    {
+        placeholder(ThumbnailMemoryCacheStateImage(uri))
+        crossfade(fadeStart = false)
+    }
+
+    val context = LocalContext.current
+    val sketch = remember { SingletonSketch.get(context) }
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-
-            .testTag("AlbumItem_" + album.name)
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
     ) {
-        Box(
+
+        AsyncImage(
+            request = request,
             modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-        ) {
+                .fillMaxSize()
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .clickable {
+                    onItemClick()
+                }
+                .clip(RoundedCornerShape(12.dp)),
 
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .clickable {
-                        onAlbumClick(album)
-                    }
-                    .clip(RoundedCornerShape(12.dp)),
+            // uri = uri,
+            contentDescription = ContentDescriptions.ALBUM_IMAGE,
+            contentScale = ContentScale.Crop,
+            sketch = sketch
+        )
 
-                uri = album.thumbnailUri.toString(),
-                contentDescription = album.name,
-                contentScale = ContentScale.Crop,
-                sketch = SingletonSketch.get(LocalPlatformContext.current)
-            )
+    }
 
-        }
+}
 
-        Spacer(modifier = Modifier.height(8.dp))
 
-        val formattedCount =
-            NumberFormat.getNumberInstance(Locale.US).format(album.itemCount)
+@Composable
+fun AlbumInfo(
+    name: String,
+    itemCount: Int,
+    modifier: Modifier = Modifier
+) {
+    val formattedCount =
+        NumberFormat.getNumberInstance(Locale.US).format(itemCount)
 
-        Column {
-            Text(text = album.name, fontWeight = FontWeight.Medium)
-            Text(
-                text = formattedCount, modifier = Modifier.alpha(0.5f)
-            )
-        }
+    Column(modifier) {
+        Text(text = name, fontWeight = FontWeight.Medium)
+        Text(
+            text = formattedCount, modifier = Modifier.alpha(0.5f)
+        )
     }
 }
 
+@Composable
+fun ShimmerGridLoader(modifier: Modifier = Modifier) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 120.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = 80.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+    ) {
+        items(12) {
+            ShimmerLoader {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .padding(8.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.Gray.copy(alpha = 0.3f))
+
+                )
+            }
+        }
+    }
+}

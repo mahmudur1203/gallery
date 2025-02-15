@@ -6,8 +6,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
+import com.myapp.gallery.domain.state.LayoutOrientation
 import com.myapp.gallery.domain.state.Resource
 import com.myapp.gallery.testing.data.albumsTestData
+import com.myapp.gallery.ui.util.TestTag
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -36,7 +38,7 @@ class AlbumsScreenKtTest{
 
         composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("LoadingIndicator").assertExists()
+        composeTestRule.onNodeWithTag(TestTag.LOADING_INDICATOR).assertExists()
 
     }
 
@@ -49,9 +51,9 @@ class AlbumsScreenKtTest{
 
         composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("ErrorMessage").assertExists()
-        composeTestRule.onNodeWithTag("RetryButton").assertExists()
-        composeTestRule.onNodeWithTag("ErrorMessage").assertTextContains("Error Test")
+        composeTestRule.onNodeWithTag(TestTag.ERROR_MESSAGE).assertExists()
+        composeTestRule.onNodeWithTag(TestTag.RETRY_BUTTON).assertExists()
+        composeTestRule.onNodeWithTag(TestTag.ERROR_MESSAGE).assertTextContains("Error Test")
     }
 
     @Test
@@ -67,28 +69,50 @@ class AlbumsScreenKtTest{
 
         composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("RetryButton").assertExists()
-        composeTestRule.onNodeWithTag("RetryButton").performClick()
+        composeTestRule.onNodeWithTag(TestTag.RETRY_BUTTON).assertExists()
+        composeTestRule.onNodeWithTag(TestTag.RETRY_BUTTON).performClick()
 
         verify(mockOnRetryClick, times(1)).run()
 
     }
 
     @Test
-    fun albumsScreen_displayAlbums_whenSuccess() {
+    fun albumsScreen_displayAlbums_whenSuccessInListView() {
 
         val albumsTestData = (albumsTestData)
         composeTestRule.setContent {
             AlbumsScreenContent(AlbumsUiState.Success(albumsTestData,
+                layoutOrientation = LayoutOrientation.LIST
                 ), {} , {})
         }
 
-        composeTestRule.onNodeWithTag("AlbumItem_Album 1").assertExists()
-        composeTestRule.onNodeWithTag("AlbumList").performScrollToIndex(20)
-        composeTestRule.onNodeWithTag("AlbumItem_Album 19").isDisplayed()
+        val startIndex = 0;
+        val lastIndex = albumsTestData.size - 1;
+
+        composeTestRule.onNodeWithTag( TestTag.ALBUM_ITEM_PREFIX + albumsTestData[startIndex].id).assertExists()
+        composeTestRule.onNodeWithTag(TestTag.ALBUM_LIST).performScrollToIndex(lastIndex)
+        composeTestRule.onNodeWithTag(TestTag.ALBUM_ITEM_PREFIX+ albumsTestData[lastIndex].id).isDisplayed()
 
     }
 
+    @Test
+    fun albumsScreen_displayAlbums_whenSuccessInGridView() {
+
+        val albumsTestData = (albumsTestData)
+        composeTestRule.setContent {
+            AlbumsScreenContent(AlbumsUiState.Success(albumsTestData,
+                layoutOrientation = LayoutOrientation.GRID
+            ), {} , {})
+        }
+
+        val startIndex = 0;
+        val lastIndex = albumsTestData.size - 1;
+
+        composeTestRule.onNodeWithTag( TestTag.ALBUM_ITEM_PREFIX + albumsTestData[startIndex].id).assertExists()
+        composeTestRule.onNodeWithTag(TestTag.ALBUM_GRID).performScrollToIndex(lastIndex)
+        composeTestRule.onNodeWithTag(TestTag.ALBUM_ITEM_PREFIX+ albumsTestData[lastIndex].id).isDisplayed()
+
+    }
 
 
 }
