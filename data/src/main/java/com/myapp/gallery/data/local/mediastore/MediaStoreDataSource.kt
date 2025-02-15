@@ -13,8 +13,8 @@ class MediaStoreDataSource(private val context:Context) {
 
          return runCatching {
             val albumMap = mutableMapOf<Long, MediaFolder>()
-            val allImages = mutableListOf<Uri>()
-            val allVideos = mutableListOf<Uri>()
+            val allImages = mutableListOf<Pair<Uri,Long>>()
+            val allVideos = mutableListOf<Pair<Uri,Long>>()
 
             fetchMediaFromStore(
                 context,
@@ -32,13 +32,18 @@ class MediaStoreDataSource(private val context:Context) {
             val sortedAlbums = albumMap.values.toList().sortedBy { it.name }
             val finalAlbums = sortedAlbums.toMutableList()
 
-            if (allImages.isNotEmpty()) {
+             val latestImageTimestamp = allImages.maxOfOrNull { it.second } ?: 0L
+             val latestVideoTimestamp = allVideos.maxOfOrNull { it.second } ?: 0L
+
+
+             if (allImages.isNotEmpty()) {
                 finalAlbums.add(
                     MediaFolder(
                         id = -1,
                         name = "All Images",
                         itemCount = allImages.size,
-                        thumbnailUri = allImages.first().toString(),
+                        thumbnailUri = allImages.first().first.toString(),
+                        timestamp = latestImageTimestamp
                     )
                 )
             }
@@ -49,7 +54,8 @@ class MediaStoreDataSource(private val context:Context) {
                         id = -2,
                         name = "All Videos",
                         itemCount = allVideos.size,
-                        thumbnailUri = allVideos.first().toString(),
+                        thumbnailUri = allVideos.first().first.toString(),
+                        timestamp = latestVideoTimestamp
 
                         )
                 )

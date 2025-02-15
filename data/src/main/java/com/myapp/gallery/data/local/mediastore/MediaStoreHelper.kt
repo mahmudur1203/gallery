@@ -11,13 +11,14 @@ fun fetchMediaFromStore(
     context: Context,
     uri: Uri,
     albumMap: MutableMap<Long, MediaFolder>,
-    allMedia: MutableList<Uri>
+    allMedia: MutableList<Pair<Uri,Long>>
 ) {
     runCatching {
         val projection = arrayOf(
             MediaStore.MediaColumns.BUCKET_ID,
             MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-            MediaStore.MediaColumns._ID
+            MediaStore.MediaColumns._ID,
+            MediaStore.MediaColumns.DATE_MODIFIED
         )
 
         val sortOrder = "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
@@ -26,16 +27,16 @@ fun fetchMediaFromStore(
             val bucketIdColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_ID)
             val bucketNameColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME)
             val mediaIdColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+            val timestampColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)
 
             while (cursor.moveToNext()) {
                 val bucketId = cursor.getLong(bucketIdColumn)
                 val bucketName = cursor.getString(bucketNameColumn) ?: "Unknown"
                 val mediaId = cursor.getLong(mediaIdColumn)
                 val mediaUri = ContentUris.withAppendedId(uri, mediaId)
+                val timestamp = cursor.getLong(timestampColumn)
 
-
-
-                allMedia.add(mediaUri)
+                allMedia.add(Pair(mediaUri,timestamp))
 
                 if (albumMap.containsKey(bucketId)) {
                     val updatedAlbum = albumMap[bucketId]!!.copy(itemCount = albumMap[bucketId]!!.itemCount + 1)
@@ -46,6 +47,7 @@ fun fetchMediaFromStore(
                         name = bucketName,
                         itemCount = 1,
                         thumbnailUri = mediaUri.toString(),
+                        timestamp = timestamp
                     )
                 }
             }

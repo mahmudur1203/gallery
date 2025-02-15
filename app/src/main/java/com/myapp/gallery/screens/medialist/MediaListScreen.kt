@@ -1,18 +1,27 @@
 package com.myapp.gallery.screens.medialist
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,6 +36,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
@@ -108,33 +119,50 @@ fun MediaListScreenContent(
 }
 
 @Composable
-fun MediaList(medias: List<Media>, onAlbumClick: (Media) -> Unit) {
+fun MediaList(medias: List<Media>, onClickItem: (Media) -> Unit) {
 
+    val listState = rememberLazyGridState()
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(4),
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag("MediaList")
-        /*.clipToBounds()*/,
-        contentPadding = PaddingValues(horizontal = 1.dp, vertical = 1.dp)
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            state = listState,
+            columns = GridCells.Adaptive(minSize = 80.dp),
+            modifier = Modifier
 
-    ) {
-        items(medias) { album ->
-            MediaItem(album, onAlbumClick)
+                .fillMaxSize()
+                .testTag("MediaList")
+                .clipToBounds(),
+            contentPadding = PaddingValues(horizontal = 1.dp, vertical = 1.dp)
+
+        ) {
+
+            items(medias, key = { it.id }) { media ->
+                MediaItem(media, onClickItem)
+            }
         }
+
+
     }
 
 }
 
+
 @Composable
 fun MediaItem(media: Media, onAlbumClick: (Media) -> Unit) {
+
+
+    // val url = remember(media) { media.getUri().toString() }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
+
             .aspectRatio(1f)
             .padding(0.75.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            )
+
     ) {
 
 
@@ -147,6 +175,7 @@ fun MediaItem(media: Media, onAlbumClick: (Media) -> Unit) {
 //                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
 //                    //shape = RoundedCornerShape(12.dp)
 //                )
+
                 .clickable {
                     onAlbumClick(media)
                 },
@@ -189,7 +218,7 @@ fun TopBar(title: String, onBackClick: () -> Unit) {
         navigationIcon = {
             IconButton(onClick = { onBackClick() }) {
                 Icon(
-                    imageVector = Icons.Outlined.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                     contentDescription = "Back"
                 )
             }

@@ -31,7 +31,7 @@ class AlbumsScreenKtTest{
 
 
         composeTestRule.setContent {
-            AlbumsScreenContent(Resource.Loading,{},{})
+            AlbumsScreenContent(AlbumsUiState.Loading,{},{})
         }
 
         composeTestRule.waitForIdle()
@@ -43,7 +43,7 @@ class AlbumsScreenKtTest{
     @Test
     fun albumsScreen_displaysError_whenError() {
         composeTestRule.setContent {
-            AlbumsScreenContent(Resource.Error("Error Test"),{},{})
+            AlbumsScreenContent(AlbumsUiState.Error("Error Test"),{},{})
         }
 
 
@@ -60,7 +60,7 @@ class AlbumsScreenKtTest{
         val mockOnRetryClick = mock(Runnable::class.java)
 
         composeTestRule.setContent {
-            AlbumsScreenContent(Resource.Error("Error Test"), {}, onRetryClick =
+            AlbumsScreenContent(AlbumsUiState.Error("Error Test"), {}, onRetryClick =
                 mockOnRetryClick::run)
 
         }
@@ -79,11 +79,11 @@ class AlbumsScreenKtTest{
 
         val albumsTestData = (albumsTestData)
         composeTestRule.setContent {
-            AlbumsScreenContent(Resource.Success(albumsTestData), {} , {})
+            AlbumsScreenContent(AlbumsUiState.Success(albumsTestData,
+                ), {} , {})
         }
 
         composeTestRule.onNodeWithTag("AlbumItem_Album 1").assertExists()
-
         composeTestRule.onNodeWithTag("AlbumList").performScrollToIndex(20)
         composeTestRule.onNodeWithTag("AlbumItem_Album 19").isDisplayed()
 

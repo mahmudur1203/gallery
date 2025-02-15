@@ -5,7 +5,6 @@ import com.myapp.gallery.BaseUnitTest
 import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.state.Resource
 import com.myapp.gallery.domain.usecase.GetAlbumsUseCase
-import com.myapp.gallery.screens.albums.AlbumsViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
@@ -30,7 +29,7 @@ class AlbumsViewModelTest : BaseUnitTest() {
         viewModel = AlbumsViewModel(getAlbumsUseCase)
 
         // fetchAlbums is called when the viewModel is created
-        viewModel.fetchAlbums()
+        //viewModel.fetchAlbums()
 
         verify(getAlbumsUseCase,times(1)).invoke()
 
@@ -43,7 +42,9 @@ class AlbumsViewModelTest : BaseUnitTest() {
 
         viewModel.fetchAlbums()
 
-        assertThat(viewModel.albums.first()).isEqualTo(successResult)
+        assertThat(viewModel.uiState.first()).isInstanceOf(AlbumsUiState.Success::class.java)
+
+        assertThat((viewModel.uiState.first() as AlbumsUiState.Success).albums).isEqualTo(successResult.data)
 
 
     }
@@ -56,8 +57,9 @@ class AlbumsViewModelTest : BaseUnitTest() {
 
         viewModel.fetchAlbums()
 
-        assertThat(viewModel.albums.first()
-            ).isEqualTo(errorResult)
+
+        assertThat(viewModel.uiState.first()
+            ).isInstanceOf(AlbumsUiState.Error::class.java)
 
     }
 

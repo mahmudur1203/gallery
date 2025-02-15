@@ -6,7 +6,8 @@ data class MediaFolder(
     val id: Long,
     val name: String,
     val itemCount: Int,
-    val thumbnailUri: String?
+    val thumbnailUri: String?,
+    val timestamp: Long
 )
 
 fun MediaFolder.toAlbum(): Album {
@@ -15,5 +16,6 @@ fun MediaFolder.toAlbum(): Album {
         name = this.name,
         itemCount = this.itemCount,
         thumbnailUri = this.thumbnailUri,
+        timestamp = this.timestamp
     )
 }

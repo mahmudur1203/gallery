@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.compose.material.icons.extended)
     implementation(libs.accompanist.permissions)
 
 
