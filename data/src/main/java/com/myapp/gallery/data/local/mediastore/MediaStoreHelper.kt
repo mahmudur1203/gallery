@@ -58,32 +58,38 @@ fun fetchMediaFromStore(
 fun fetchMedia(context: Context,uri: Uri, albumId: Long? = null, isVideo: Boolean = false): List<MediaFile> {
     val mediaList = mutableListOf<MediaFile>()
 
-    val projection = arrayOf(
+    val projectionList = mutableListOf(
         MediaStore.MediaColumns._ID,
         MediaStore.MediaColumns.DISPLAY_NAME,
         MediaStore.MediaColumns.SIZE,
-        MediaStore.MediaColumns.DATE_MODIFIED, // ✅ Fetch Timestamp
-        MediaStore.MediaColumns.BUCKET_ID,
-        MediaStore.Video.Media.DURATION
-    )
+        MediaStore.MediaColumns.DATE_MODIFIED,
+        MediaStore.MediaColumns.BUCKET_ID)
+        .also {
+            if (isVideo) {
+                it.add(MediaStore.Video.Media.DURATION)
+            }
+        }
 
     val selection = albumId?.let { "${MediaStore.MediaColumns.BUCKET_ID} = ?" }
     val selectionArgs = albumId?.let { arrayOf(it.toString()) }
     val sortOrder = "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
 
-    context.contentResolver.query(uri, projection, selection, selectionArgs, sortOrder)?.use { cursor ->
+    context.contentResolver.query(uri, projectionList.toTypedArray(), selection, selectionArgs, sortOrder)?.use { cursor ->
         val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
         val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
         val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
-        val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED) // ✅ Timestamp
+        val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)
         val durationColumn = if (isVideo) cursor.getColumnIndex(MediaStore.Video.Media.DURATION) else -1
 
         while (cursor.moveToNext()) {
             val mediaId = cursor.getLong(idColumn)
             val mediaUri = ContentUris.withAppendedId(uri, mediaId)
             val fileName = cursor.getString(nameColumn) ?: "Unknown"
+
             val fileSize = cursor.getLong(sizeColumn)
-            val timestamp = cursor.getLong(dateColumn) * 1000 // ✅ Convert to milliseconds
+
+            val timestamp = cursor.getLong(dateColumn) * 1000
+
             val duration = if (isVideo && durationColumn != -1) cursor.getLong(durationColumn) else null
 
             mediaList.add(

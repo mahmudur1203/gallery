@@ -1,3 +1,4 @@
+import com.android.build.api.variant.impl.fullName
 
 plugins {
     alias(libs.plugins.android.application)
@@ -20,6 +21,9 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        versionCode = libs.versions.appVersionCode.get().toInt()
+        versionName = libs.versions.appVersioneName.get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -56,15 +60,23 @@ android {
         // Disable device's animation for instrument testing
         // animationsDisabled = true
     }
+
+    applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                val outputFileName = "Gallery-${variant.buildType.name}-${variant.versionName}.apk"
+                output.outputFileName = outputFileName
+            }
+    }
+
 }
 
 dependencies {
 
     implementation(project(":domain"))
     implementation(project(":data"))
-
-
-
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -78,6 +90,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
     implementation(libs.accompanist.permissions)
     implementation(libs.compose.shimmer)
+    implementation(libs.splashscreen)
 
     implementation(libs.kotlinx.coroutines.core)
 
@@ -87,7 +100,6 @@ dependencies {
     implementation(libs.hilt.navigation)
     kapt(libs.hilt.compiler)
 
-    implementation(libs.timber)
 
     implementation(libs.sketch.compose)
     implementation(libs.sketch.extensions.compose)
@@ -97,6 +109,10 @@ dependencies {
     implementation(libs.sketch.animated.webp)
     implementation(libs.sketch.svg)
     implementation(libs.sketch.http.ktor)
+
+
+    implementation(libs.timber)
+    implementation(libs.slf4j.simple)
 
 
     testImplementation(libs.junit)

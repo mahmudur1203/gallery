@@ -19,12 +19,11 @@
         android:hardwareAccelerated="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Gallery"
-         >
+        android:theme="@style/Theme.Gallery">
         <activity
             android:name=".screens.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Gallery" >
+            android:theme="@style/Theme.Gallery.Splash" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
