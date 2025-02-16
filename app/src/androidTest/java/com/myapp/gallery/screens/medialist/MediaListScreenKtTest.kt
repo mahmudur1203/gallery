@@ -1,5 +1,6 @@
 package com.myapp.gallery.screens.medialist
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -34,8 +35,8 @@ class MediaListScreenKtTest {
         composeTestRule.waitForIdle()
 
         composeTestRule
-            .onNodeWithTag("LoadingIndicator")
-            .assertExists()
+            .onNodeWithTag(TestTag.LOADING_INDICATOR)
+            .assertIsDisplayed()
     }
 
     @Test
@@ -54,11 +55,11 @@ class MediaListScreenKtTest {
 
         composeTestRule
             .onNodeWithTag(TestTag.ERROR_MESSAGE)
-            .assertExists()
+            .assertIsDisplayed()
 
         composeTestRule
             .onNodeWithTag(TestTag.RETRY_BUTTON)
-            .assertExists()
+            .assertIsDisplayed()
 
         composeTestRule.onNodeWithTag(TestTag.RETRY_BUTTON).performClick()
 
@@ -83,10 +84,16 @@ class MediaListScreenKtTest {
         val startIndex = 0;
         val lastIndex = mediaListTestData.size - 1;
 
-        composeTestRule.onNodeWithTag(TestTag.MEDIA_LIST).performScrollToIndex(70)
-        composeTestRule.onNodeWithTag(TestTag.MEDIA_ITEM_PREFIX + mediaList[lastIndex].id).isDisplayed()
+        composeTestRule.onNodeWithTag(TestTag.MEDIA_ITEM_PREFIX + mediaList[0].id).assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag(TestTag.MEDIA_LIST).performScrollToIndex(lastIndex)
+        composeTestRule.onNodeWithTag(TestTag.MEDIA_ITEM_PREFIX + mediaList[lastIndex].id).assertIsDisplayed()
+
 
     }
+
+
+
 
 
 }

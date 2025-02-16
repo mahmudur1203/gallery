@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
@@ -170,6 +171,7 @@ fun MediaItem(media: Media, onClickItem: (Media) -> Unit) {
             .background(
                 color = MaterialTheme.colorScheme.surfaceContainerHigh
             )
+           // .clipToBounds()
 
     ) {
 
@@ -195,23 +197,23 @@ fun MediaItem(media: Media, onClickItem: (Media) -> Unit) {
 @Composable
 fun ImageItem(uri: String, onClickItem: () -> Unit) {
 
-    val request = ImageRequest(LocalContext.current, uri)
-    {
-        placeholder(ThumbnailMemoryCacheStateImage(uri))
-        crossfade(fadeStart = false)
-    }
+//    val request = ImageRequest(LocalContext.current, uri)
+//    {
+//        placeholder(ThumbnailMemoryCacheStateImage(uri))
+//        crossfade(fadeStart = false)
+//    }
 
     val context = LocalContext.current
     val sketch = remember { SingletonSketch.get(context) }
 
     AsyncImage(
-        request = request,
+        //request = request,
         modifier = Modifier
             .fillMaxSize()
             .clickable {
                 onClickItem()
             },
-        //uri = uri.toString(),
+        uri = uri.toString(),
         contentDescription = ContentDescriptions.MEDIA_IMAGE,
         contentScale = ContentScale.Crop,
         sketch = sketch,

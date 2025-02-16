@@ -321,11 +321,6 @@ fun AlbumImage(
     onItemClick: () -> Unit
 ) {
 
-    val request = ImageRequest(LocalContext.current, uri)
-    {
-        placeholder(ThumbnailMemoryCacheStateImage(uri))
-        crossfade(fadeStart = false)
-    }
 
     val context = LocalContext.current
     val sketch = remember { SingletonSketch.get(context) }
@@ -337,7 +332,6 @@ fun AlbumImage(
     ) {
 
         AsyncImage(
-            request = request,
             modifier = Modifier
                 .fillMaxSize()
                 .border(
@@ -350,7 +344,7 @@ fun AlbumImage(
                 }
                 .clip(RoundedCornerShape(12.dp)),
 
-            // uri = uri,
+             uri = uri,
             contentDescription = ContentDescriptions.ALBUM_IMAGE,
             contentScale = ContentScale.Crop,
             sketch = sketch

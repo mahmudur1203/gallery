@@ -4,7 +4,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.myapp.gallery.BaseScreenTest
@@ -12,8 +15,10 @@ import com.myapp.gallery.domain.model.Album
 import com.myapp.gallery.domain.state.Resource
 import com.myapp.gallery.domain.usecase.GetAlbumsUseCase
 import com.myapp.gallery.screens.MainActivity
+import com.myapp.gallery.screens.medialist.MediaListScreen
 import com.myapp.gallery.testing.data.albumsTestData
 import com.myapp.gallery.ui.theme.GalleryTheme
+import com.myapp.gallery.ui.util.ContentDescriptions
 import com.myapp.gallery.ui.util.TestTag
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
@@ -49,7 +54,7 @@ class AlbumsScreenKtTest : BaseScreenTest() {
     }
 
     @Test
-    fun `When entering the Home screen, it shows UI correctly`() {
+    fun `When entering the Albums screen, it shows UI correctly`() {
 
         runBlocking {
             whenever(getAlbumsUseCase.invoke()).thenReturn(
@@ -57,6 +62,7 @@ class AlbumsScreenKtTest : BaseScreenTest() {
         }
 
         initComposable {
+
             onNodeWithTag(TestTag.ALBUMS_SCREEN).assertIsDisplayed()
         }
 
@@ -74,8 +80,6 @@ class AlbumsScreenKtTest : BaseScreenTest() {
 
         initComposable {
 
-            composeRule.waitForIdle()
-            advanceUntilIdle()
 
             onNodeWithTag(TestTag.LOADING_INDICATOR).assertIsDisplayed()
         }
@@ -93,9 +97,6 @@ class AlbumsScreenKtTest : BaseScreenTest() {
 
         initComposable {
 
-            composeRule.waitForIdle()
-            advanceUntilIdle()
-
             onNodeWithTag(TestTag.ERROR_MESSAGE).assertIsDisplayed()
         }
 
@@ -110,9 +111,6 @@ class AlbumsScreenKtTest : BaseScreenTest() {
         }
 
         initComposable {
-
-            composeRule.waitForIdle()
-            advanceUntilIdle()
 
             onNodeWithTag(TestTag.ALBUM_GRID).assertIsDisplayed()
         }
@@ -158,13 +156,14 @@ class AlbumsScreenKtTest : BaseScreenTest() {
             composeRule.waitForIdle()
             advanceUntilIdle()
 
-            viewModel.toggleLayoutType()
+            onNodeWithContentDescription(ContentDescriptions.TOGGLE_VIEW).assertIsDisplayed()
+
+            onNodeWithContentDescription(ContentDescriptions.TOGGLE_VIEW).performClick()
 
             onNodeWithTag(TestTag.ALBUM_LIST).assertIsDisplayed()
         }
 
     }
-
 
     private fun initComposable(
         testBody: AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>.() -> Unit,

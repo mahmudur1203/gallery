@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
@@ -28,6 +29,7 @@ import com.github.panpf.sketch.request.ImageRequest
 import com.github.panpf.sketch.state.ThumbnailMemoryCacheStateImage
 import com.myapp.gallery.domain.model.Media
 import com.myapp.gallery.ui.util.ContentDescriptions
+import com.myapp.gallery.ui.util.TestTag
 
 
 @Composable
@@ -54,12 +56,15 @@ fun FullScreenMediaViewer(
         ) {
             Box(
                 modifier = Modifier
+                    .testTag(TestTag.MEDIA_FULL_SCREEN_VIEW)
                     .fillMaxSize()
                     .background(Color.Black)
             ) {
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
+                        .testTag(TestTag.MEDIA_FULL_SCREEN_VIEW_PAGER),
+
                 ) { page ->
                     val media = mediaList[page]
 
@@ -78,17 +83,13 @@ fun FullScreenMediaViewer(
                         val context = LocalContext.current
                         val sketch = remember { SingletonSketch.get(context) }
 
-                        val request = ImageRequest(LocalContext.current, media.uri)
-                        {
-                            placeholder(ThumbnailMemoryCacheStateImage(media.uri))
-                            crossfade(fadeStart = false)
-                        }
 
                         com.github.panpf.sketch.AsyncImage(
-                            request = request,
+                            //request = request,
                             modifier = Modifier
+                                .testTag(TestTag.MEDIA_FULL_SCREEN_VIEW_PAGER + media.id)
                                 .fillMaxSize(),
-                            //uri = uri.toString(),
+                            uri = media.uri.toString(),
                             contentDescription = ContentDescriptions.MEDIA_IMAGE,
                             contentScale = ContentScale.Fit,
                             sketch = sketch
